@@ -1,0 +1,46 @@
+# Fichiers de configuration sensibles
+config.php
+
+# Logs
+logs/*.log
+logs/*.txt
+
+# Fichiers temporaires
+*.tmp
+*.temp
+*~
+
+# Fichiers système
+.DS_Store
+Thumbs.db
+
+# Fichiers de test
+test_*.php
+test_*.html
+
+# Cache
+cache/
+tmp/
+
+# Uploads (si implémentés)
+uploads/
+media/
+
+# Base de données locale
+*.sql
+*.db
+*.sqlite
+
+# Environnement local
+.env
+.env.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Composer (si utilisé)
+vendor/
+composer.lock

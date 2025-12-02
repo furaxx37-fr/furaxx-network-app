@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FuraXx Network - Connexions Anonymes</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #0f0f0f 0%, #1a1a1a 50%, #0f0f0f 100%);
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+        }
+        .netflix-red { color: #e50914; }
+        .netflix-red-bg { background-color: #e50914; }
+        .logo-glow {
+            text-shadow: 0 0 20px rgba(229, 9, 20, 0.5);
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+        .card-hover {
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(229, 9, 20, 0.3);
+        }
+        .gradient-text {
+            background: linear-gradient(45deg, #e50914, #ff6b6b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+    </style>
+</head>
+<body class="min-h-screen text-white">
+    <!-- Header -->
+    <header class="p-6">
+        <div class="container mx-auto flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <div class="w-12 h-12 netflix-red-bg rounded-lg flex items-center justify-center logo-glow">
+                    <i class="fas fa-ghost text-white text-xl"></i>
+                </div>
+                <h1 class="text-3xl font-bold gradient-text">FuraXx Network</h1>
+            </div>
+            <nav class="hidden md:flex space-x-6">
+                <a href="#" class="hover:text-red-400 transition-colors">Accueil</a>
+                <a href="#" class="hover:text-red-400 transition-colors">À propos</a>
+                <a href="#" class="hover:text-red-400 transition-colors">Sécurité</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <main class="container mx-auto px-6 py-12">
+        <div class="text-center mb-16">
+            <div class="mb-8">
+                <div class="w-24 h-24 netflix-red-bg rounded-full flex items-center justify-center mx-auto mb-6 logo-glow">
+                    <i class="fas fa-mask text-white text-4xl"></i>
+                </div>
+                <h2 class="text-6xl font-bold mb-4 gradient-text">FuraXx Network</h2>
+                <p class="text-xl text-gray-300 max-w-2xl mx-auto">
+                    Connectez-vous de manière totalement anonyme. Partagez des moments éphémères sans laisser de traces.
+                </p>
+            </div>
+
+            <!-- Auth Cards -->
+            <div class="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+                <!-- Connexion Anonyme -->
+                <div class="card-hover bg-gray-900 bg-opacity-50 p-8 rounded-2xl border border-gray-700">
+                    <div class="w-16 h-16 netflix-red-bg rounded-full flex items-center justify-center mx-auto mb-6">
+                        <i class="fas fa-user-secret text-white text-2xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-4 netflix-red">Connexion Anonyme</h3>
+                    <p class="text-gray-400 mb-6">
+                        Générez un identifiant unique et temporaire. Aucune donnée personnelle requise.
+                    </p>
+                    <button onclick="connectAnonymously()" class="w-full netflix-red-bg hover:bg-red-700 text-white font-bold py-3 px-6 rounded-lg transition-colors">
+                        <i class="fas fa-rocket mr-2"></i>
+                        Se Connecter Anonymement
+                    </button>
+                </div>
+
+                <!-- Créer une Session -->
+                <div class="card-hover bg-gray-900 bg-opacity-50 p-8 rounded-2xl border border-gray-700">
+                    <div class="w-16 h-16 bg-purple-600 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <i class="fas fa-plus text-white text-2xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-4 text-purple-400">Créer une Session</h3>
+                    <p class="text-gray-400 mb-6">
+                        Créez une session temporaire et partagez le code avec vos amis.
+                    </p>
+                    <button onclick="createSession()" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-lg transition-colors">
+                        <i class="fas fa-users mr-2"></i>
+                        Créer une Session
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Features -->
+        <div class="grid md:grid-cols-3 gap-8 mt-16">
+            <div class="text-center">
+                <div class="w-16 h-16 bg-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-eye-slash text-white text-2xl"></i>
+                </div>
+                <h4 class="text-xl font-bold mb-2">100% Anonyme</h4>
+                <p class="text-gray-400">Aucune donnée personnelle stockée. Identifiants temporaires uniquement.</p>
+            </div>
+            <div class="text-center">
+                <div class="w-16 h-16 bg-yellow-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-clock text-white text-2xl"></i>
+                </div>
+                <h4 class="text-xl font-bold mb-2">Messages Éphémères</h4>
+                <p class="text-gray-400">Tous les messages disparaissent automatiquement après lecture.</p>
+            </div>
+            <div class="text-center">
+                <div class="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-shield-alt text-white text-2xl"></i>
+                </div>
+                <h4 class="text-xl font-bold mb-2">Sécurisé</h4>
+                <p class="text-gray-400">Chiffrement de bout en bout pour toutes vos communications.</p>
+            </div>
+        </div>
+    </main>
+
+    <!-- Loading Modal -->
+    <div id="loadingModal" class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center hidden z-50">
+        <div class="bg-gray-900 p-8 rounded-2xl text-center border border-gray-700">
+            <div class="w-16 h-16 netflix-red-bg rounded-full flex items-center justify-center mx-auto mb-4 logo-glow">
+                <i class="fas fa-spinner fa-spin text-white text-2xl"></i>
+            </div>
+            <h3 class="text-xl font-bold mb-2">Connexion en cours...</h3>
+            <p class="text-gray-400">Génération de votre identité anonyme</p>
+        </div>
+    </div>
+
+    <script>
+        function showLoading() {
+            document.getElementById('loadingModal').classList.remove('hidden');
+        }
+
+        function hideLoading() {
+            document.getElementById('loadingModal').classList.add('hidden');
+        }
+
+        function connectAnonymously() {
+            showLoading();
+            
+            // Générer un ID anonyme unique
+            const anonymousId = 'anon_' + Math.random().toString(36).substr(2, 9) + Date.now().toString(36);
+            
+            // Simuler la connexion
+            setTimeout(() => {
+                localStorage.setItem('furaxx_anonymous_id', anonymousId);
+                localStorage.setItem('furaxx_session_start', Date.now());
+                window.location.href = 'app.php';
+            }, 2000);
+        }
+
+        function createSession() {
+            showLoading();
+            
+            // Générer un code de session
+            const sessionCode = Math.random().toString(36).substr(2, 6).toUpperCase();
+            
+            setTimeout(() => {
+                localStorage.setItem('furaxx_session_code', sessionCode);
+                localStorage.setItem('furaxx_is_host', 'true');
+                window.location.href = 'session.php?code=' + sessionCode;
+            }, 1500);
+        }
+
+        // Animation d'entrée
+        window.addEventListener('load', function() {
+            document.body.style.opacity = '0';
+            document.body.style.transition = 'opacity 0.5s ease';
+            setTimeout(() => {
+                document.body.style.opacity = '1';
+            }, 100);
+        });
+    </script>
+</body>
+</html>
