@@ -50,7 +50,7 @@ try {
     }
     
     // Add user to session
-    $stmt = $pdo->prepare("INSERT INTO active_connections (session_code, anonymous_id, joined_at) VALUES (?, ?, NOW())");
+    $stmt = $pdo->prepare("INSERT INTO active_connections (session_code, anonymous_id, last_ping) VALUES (?, ?, NOW())");
     $stmt->execute([$session_code, $anonymous_id]);
     
     echo json_encode([

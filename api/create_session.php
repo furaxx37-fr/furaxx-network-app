@@ -21,6 +21,10 @@ if (empty($session_name) || empty($anonymous_id) || !isValidAnonymousId($anonymo
 try {
     $pdo = Database::getInstance()->getConnection();
     
+    // First, ensure the anonymous user exists
+    $stmt = $pdo->prepare("INSERT IGNORE INTO anonymous_users (anonymous_id, is_host, created_at) VALUES (?, 1, NOW())");
+    $stmt->execute([$anonymous_id]);
+    
     // Generate unique session code
     $session_code = 'fx_' . uniqid() . '_' . rand(1000, 9999);
     
@@ -29,7 +33,7 @@ try {
     $stmt->execute([$session_code, $anonymous_id]);
     
     // Add creator to active connections
-    $stmt = $pdo->prepare("INSERT INTO active_connections (session_code, anonymous_id, joined_at) VALUES (?, ?, NOW())");
+    $stmt = $pdo->prepare("INSERT INTO active_connections (session_code, anonymous_id, last_ping) VALUES (?, ?, NOW())");
     $stmt->execute([$session_code, $anonymous_id]);
     
     echo json_encode([
@@ -41,6 +45,6 @@ try {
     
 } catch (Exception $e) {
     http_response_code(500);
-    echo json_encode(['error' => 'Failed to create session']);
+    echo json_encode(['error' => 'Failed to create session', 'debug' => $e->getMessage()]);
 }
 ?>
