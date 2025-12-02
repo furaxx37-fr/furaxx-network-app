@@ -662,21 +662,47 @@ try {
                 return;
             }
             
-            const shareUrl = `${window.location.origin}${window.location.pathname}?session=${currentSession}`;
-            
-            if (navigator.share) {
-                navigator.share({
-                    title: 'Rejoindre ma session Furaxx Network',
-                    text: `Rejoignez ma session avec le code: ${currentSession}`,
-                    url: shareUrl
-                });
-            } else {
-                navigator.clipboard.writeText(shareUrl).then(() => {
-                    alert(`Lien copié ! Code de session: ${currentSession}\nLien: ${shareUrl}`);
-                }).catch(() => {
-                    prompt('Copiez ce lien:', shareUrl);
-                });
-            }
+            // Call backend API to generate share link
+            fetch('api/share_session.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    session_code: currentSession,
+                    anonymous_id: anonymousId
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const shareUrl = data.share_link;
+                    const participantCount = data.participant_count;
+                    
+                    if (navigator.share) {
+                        navigator.share({
+                            title: 'Rejoindre ma session Furaxx Network',
+                            text: `Rejoignez ma session avec le code: ${currentSession} (${participantCount} participants)`,
+                            url: shareUrl
+                        });
+                    } else {
+                        navigator.clipboard.writeText(shareUrl).then(() => {
+                            alert(`Lien copié ! 
+Code de session: ${currentSession}
+Participants: ${participantCount}
+Lien: ${shareUrl}`);
+                        }).catch(() => {
+                            prompt('Copiez ce lien:', shareUrl);
+                        });
+                    }
+                } else {
+                    alert('Erreur lors de la génération du lien de partage: ' + (data.message || 'Erreur inconnue'));
+                }
+            })
+            .catch(error => {
+                console.error('Erreur:', error);
+                alert('Erreur lors de la génération du lien de partage');
+            });
         }
 
         function createSession() {
