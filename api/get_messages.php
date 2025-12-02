@@ -1,5 +1,6 @@
 <?php
 require_once '../config.php';
+require_once '../functions.php';
 header('Content-Type: application/json');
 
 if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
@@ -20,8 +21,9 @@ if (empty($session_code) || empty($anonymous_id)) {
 try {
     // Verify user is part of this session
     // Get database connection
-    $db = Database::getInstance();
-    $pdo = $db->getConnection();
+    require_once '../config.php';
+    $pdo = new PDO("mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=utf8mb4", DB_USER, DB_PASS);
+    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     
     // Verify user is part of this session
     $stmt = $pdo->prepare("SELECT id FROM active_connections WHERE session_code = ? AND anonymous_id = ?");

@@ -1,5 +1,6 @@
 <?php
 require_once '../config.php';
+require_once '../functions.php';
 header('Content-Type: application/json');
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -13,14 +14,15 @@ $session_name = trim($input['session_name'] ?? '');
 $anonymous_id = trim($input['anonymous_id'] ?? '');
 $custom_code = trim($input['custom_code'] ?? '');
 
-if (empty($session_name) || empty($anonymous_id) || !isValidAnonymousId($anonymous_id)) {
+if (empty($session_name) || empty($anonymous_id)) {
     http_response_code(400);
     echo json_encode(['error' => 'Missing required fields']);
     exit;
 }
 
 try {
-    $pdo = Database::getInstance()->getConnection();
+    $pdo = new PDO("mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=utf8mb4", DB_USER, DB_PASS);
+    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     
     // First, ensure the anonymous user exists
     $stmt = $pdo->prepare("INSERT IGNORE INTO anonymous_users (anonymous_id, is_host, created_at) VALUES (?, 1, NOW())");

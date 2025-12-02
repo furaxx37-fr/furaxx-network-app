@@ -1,7 +1,6 @@
 <?php
 require_once '../config.php';
-$db = Database::getInstance();
-$pdo = $db->getConnection();
+require_once '../functions.php';
 
 header('Content-Type: application/json');
 

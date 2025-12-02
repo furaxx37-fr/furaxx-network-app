@@ -1,5 +1,6 @@
 <?php
 require_once '../config.php';
+require_once '../functions.php';
 header('Content-Type: application/json');
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -12,14 +13,15 @@ $input = json_decode(file_get_contents('php://input'), true);
 $session_code = trim($input['session_code'] ?? '');
 $anonymous_id = trim($input['anonymous_id'] ?? '');
 
-if (empty($session_code) || empty($anonymous_id) || !isValidSessionCode($session_code) || !isValidAnonymousId($anonymous_id)) {
+if (empty($session_code) || empty($anonymous_id)) {
     http_response_code(400);
     echo json_encode(['error' => 'Invalid session code or anonymous ID']);
     exit;
 }
 
 try {
-    $pdo = Database::getInstance()->getConnection();
+    $pdo = new PDO("mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=utf8mb4", DB_USER, DB_PASS);
+    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     
     // Check if session exists and is active
     $stmt = $pdo->prepare("SELECT * FROM sessions WHERE session_code = ? AND status = 'active' AND expires_at > NOW()");
