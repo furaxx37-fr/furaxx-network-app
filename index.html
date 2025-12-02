@@ -170,7 +170,7 @@
             setTimeout(() => {
                 localStorage.setItem('furaxx_session_code', sessionCode);
                 localStorage.setItem('furaxx_is_host', 'true');
-                window.location.href = 'session.php?code=' + sessionCode;
+                window.location.href = 'app.php?id=' + anonymousId + '&session_code=' + sessionCode;
             }, 1500);
         }
 
