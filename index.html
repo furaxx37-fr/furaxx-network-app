@@ -150,14 +150,16 @@
         function connectAnonymously() {
             showLoading();
             
-            // Générer un ID anonyme unique
-            const anonymousId = 'anon_' + Math.random().toString(36).substr(2, 9) + Date.now().toString(36);
+            // Générer un ID anonyme unique avec le bon format
+            const timestamp = Math.floor(Date.now() / 1000);
+            const randomHex = Array.from({length: 16}, () => Math.floor(Math.random() * 16).toString(16)).join('');
+            const anonymousId = `anon_${randomHex}_${timestamp}`;
             
             // Simuler la connexion
             setTimeout(() => {
                 localStorage.setItem('furaxx_anonymous_id', anonymousId);
                 localStorage.setItem('furaxx_session_start', Date.now());
-                window.location.href = 'app.php';
+                window.location.href = 'app.php?id=' + anonymousId;
             }, 2000);
         }
 
@@ -187,7 +189,7 @@
                     localStorage.setItem('furaxx_anonymous_id', anonymousId);
                     localStorage.setItem('furaxx_session_code', data.session_code);
                     localStorage.setItem('furaxx_is_host', 'true');
-                    window.location.href = 'app.php?session_code=' + data.session_code;
+                    window.location.href = 'app.php?id=' + anonymousId + '&session_code=' + data.session_code;
                 } else {
                     alert('Erreur lors de la création de la session: ' + (data.error || 'Erreur inconnue'));
                 }
