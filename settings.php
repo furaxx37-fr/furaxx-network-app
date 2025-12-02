@@ -27,9 +27,6 @@ define('USERNAME_PREFIX', 'Anonyme_');
 require_once 'config.php';
 
 // Fonctions utilitaires pour la sécurité
-function sanitizeInput($input) {
-    return htmlspecialchars(trim($input), ENT_QUOTES, 'UTF-8');
-}
 
 function validateAnonymousId($id) {
     return preg_match('/^anon_[a-f0-9]{16}_[0-9]{10}$/', $id);
@@ -62,7 +59,21 @@ function setSecurityHeaders() {
 function logActivity($message, $level = 'INFO') {
     $timestamp = date('Y-m-d H:i:s');
     $logMessage = "[$timestamp] [$level] $message" . PHP_EOL;
-    file_put_contents('logs/app.log', $logMessage, FILE_APPEND | LOCK_EX);
+    
+    // Rotation des logs si le fichier devient trop volumineux (> 5MB)
+    $logFile = 'logs/app.log';
+    if (file_exists($logFile) && filesize($logFile) > 5 * 1024 * 1024) {
+        $backupFile = 'logs/app_' . date('Y-m-d_H-i-s') . '.log';
+        rename($logFile, $backupFile);
+    }
+    
+    // Écriture du log avec verrouillage
+    file_put_contents($logFile, $logMessage, FILE_APPEND | LOCK_EX);
+    
+    // Log critique également dans le log système si niveau ERROR ou CRITICAL
+    if (in_array($level, ['ERROR', 'CRITICAL'])) {
+        error_log("FuraXx Network [$level]: $message");
+    }
 }
 
 // Créer le dossier de logs si nécessaire
