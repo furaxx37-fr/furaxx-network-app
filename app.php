@@ -576,7 +576,20 @@ try {
         }
 
         function loadMessages() {
-            fetch(`api/get_messages.php?anonymous_id=${anonymousId}&session_code=${currentSession || ''}`)
+            // Only load messages if we have an active session
+            if (!currentSession) {
+                const container = document.getElementById('messagesContainer');
+                container.innerHTML = `
+                    <div class="text-center text-gray-500 py-8">
+                        <i class="fas fa-comments text-4xl mb-4 opacity-50"></i>
+                        <p>Rejoignez ou créez une session pour voir les messages</p>
+                        <p class="text-sm">Commencez une conversation anonyme !</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            fetch(`api/get_messages.php?anonymous_id=${anonymousId}&session_code=${currentSession}`)
                 .then(response => response.json())
                 .then(messages => {
                     const container = document.getElementById('messagesContainer');
@@ -596,7 +609,18 @@ try {
                     messages.forEach(message => {
                         displayMessage(message, message.sender_id === anonymousId);
                     });
+                })
+                .catch(error => {
+                    console.error('Error loading messages:', error);
+                    const container = document.getElementById('messagesContainer');
+                    container.innerHTML = `
+                        <div class="text-center text-red-500 py-8">
+                            <i class="fas fa-exclamation-triangle text-4xl mb-4"></i>
+                            <p>Erreur lors du chargement des messages</p>
+                        </div>
+                    `;
                 });
+        }
         }
 
         function loadOnlineUsers() {
@@ -770,11 +794,10 @@ Lien: ${shareUrl}`);
             });
         }
 
-        // Auto-join logic for shared session links
-        const urlParams = new URLSearchParams(window.location.search);
-        const sessionCode = urlParams.get('session');
-        if (sessionCode) {
-            // Auto-join the session
+        // Auto-join function for shared session links
+        function autoJoinSession(sessionCode) {
+            if (!sessionCode) return;
+            
             fetch('api/join_session.php', {
                 method: 'POST',
                 headers: {
@@ -782,7 +805,7 @@ Lien: ${shareUrl}`);
                 },
                 body: JSON.stringify({
                     session_code: sessionCode,
-                    anonymous_id: userId
+                    anonymous_id: anonymousId
                 })
             })
             .then(response => response.json())
@@ -794,13 +817,14 @@ Lien: ${shareUrl}`);
                     hideCreateSession();
                     loadMessages();
                     startMessagePolling();
+                    showNotification(`Connecté à la session: ${sessionCode}`, 'success');
                 } else {
-                    alert('Erreur lors de la connexion à la session: ' + data.message);
+                    showNotification('Erreur lors de la connexion à la session: ' + data.message, 'error');
                 }
             })
             .catch(error => {
                 console.error('Erreur:', error);
-                alert('Erreur de connexion à la session');
+                showNotification('Erreur de connexion à la session', 'error');
             });
         }
 
