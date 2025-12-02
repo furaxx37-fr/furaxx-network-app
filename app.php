@@ -194,51 +194,69 @@ try {
         </div>
     </header>
 
-    <div class="container mx-auto p-4 flex gap-6">
+    <!-- Mobile Menu Toggle (visible only on mobile) -->
+    <div class="lg:hidden fixed top-4 left-4 z-50">
+        <button id="mobileMenuToggle" onclick="toggleMobileSidebar()" class="bg-gray-900 bg-opacity-90 text-white p-3 rounded-lg border border-gray-700">
+            <i class="fas fa-bars"></i>
+        </button>
+    </div>
+
+    <!-- Mobile Sidebar Overlay -->
+    <div id="mobileOverlay" class="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-40 hidden" onclick="closeMobileSidebar()"></div>
+
+    <div class="container mx-auto p-2 sm:p-4 flex flex-col lg:flex-row gap-4 lg:gap-6">
         <!-- Sidebar -->
-        <div class="w-80 bg-gray-900 bg-opacity-50 rounded-2xl p-6 border border-gray-700">
-            <h2 class="text-xl font-bold mb-6 netflix-red">Actions Rapides</h2>
+        <div id="sidebar" class="fixed lg:relative top-0 left-0 h-full lg:h-auto w-80 lg:w-80 xl:w-96 bg-gray-900 bg-opacity-95 lg:bg-opacity-50 rounded-none lg:rounded-2xl p-4 lg:p-6 border-r lg:border border-gray-700 z-50 transform -translate-x-full lg:translate-x-0 transition-transform duration-300 overflow-y-auto">
+            <!-- Close button for mobile -->
+            <div class="lg:hidden flex justify-between items-center mb-4 pb-4 border-b border-gray-700">
+                <h2 class="text-lg font-bold netflix-red">Menu</h2>
+                <button onclick="closeMobileSidebar()" class="text-gray-400 hover:text-white">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+
+            <h2 class="text-lg lg:text-xl font-bold mb-4 lg:mb-6 netflix-red hidden lg:block">Actions Rapides</h2>
             
             <!-- Créer/Rejoindre Session -->
-            <div class="space-y-4 mb-8">
-                <button onclick="showCreateSession()" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-4 rounded-lg transition-colors">
+            <div class="space-y-3 lg:space-y-4 mb-6 lg:mb-8">
+                <button onclick="showCreateSession()" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-2.5 lg:py-3 px-3 lg:px-4 rounded-lg transition-colors text-sm lg:text-base">
                     <i class="fas fa-plus mr-2"></i>
                     Créer une Session
                 </button>
                 
                 <div class="flex gap-2">
                     <input type="text" id="sessionCodeInput" placeholder="Code session" 
-                           class="flex-1 bg-gray-800 border border-gray-600 rounded-lg px-3 py-2 text-white placeholder-gray-400 focus:border-purple-400 focus:outline-none">
-                    <button onclick="joinSession()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors">
+                           class="flex-1 bg-gray-800 border border-gray-600 rounded-lg px-2 lg:px-3 py-2 text-white placeholder-gray-400 focus:border-purple-400 focus:outline-none text-sm lg:text-base">
+                    <button onclick="joinSession()" class="bg-green-600 hover:bg-green-700 text-white px-3 lg:px-4 py-2 rounded-lg transition-colors">
                         <i class="fas fa-sign-in-alt"></i>
                     </button>
                 </div>
 
                 <!-- Bouton de partage -->
-                <button id="shareButton" onclick="shareSession()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition-colors hidden">
+                <button id="shareButton" onclick="shareSession()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 lg:py-3 px-3 lg:px-4 rounded-lg transition-colors hidden text-sm lg:text-base">
                     <i class="fas fa-share-alt mr-2"></i>
                     Partager la Session
                 </button>
             </div>
 
             <!-- Sessions Actives -->
-            <div class="mb-8">
-                <h3 class="text-lg font-semibold mb-4 text-gray-300">Sessions Actives</h3>
+            <div class="mb-6 lg:mb-8">
+                <h3 class="text-base lg:text-lg font-semibold mb-3 lg:mb-4 text-gray-300">Sessions Actives</h3>
                 <div id="activeSessions" class="space-y-2">
-                    <p class="text-gray-500 text-sm">Aucune session active</p>
+                    <p class="text-gray-500 text-xs lg:text-sm">Aucune session active</p>
                 </div>
             </div>
 
             <!-- Utilisateurs En Ligne -->
             <div>
-                <h3 class="text-lg font-semibold mb-4 text-gray-300">Utilisateurs Anonymes</h3>
+                <h3 class="text-base lg:text-lg font-semibold mb-3 lg:mb-4 text-gray-300">Utilisateurs Anonymes</h3>
                 <div id="onlineUsers" class="space-y-2">
                     <div class="flex items-center space-x-3 p-2 bg-gray-800 rounded-lg">
-                        <div class="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
+                        <div class="w-6 h-6 lg:w-8 lg:h-8 bg-blue-600 rounded-full flex items-center justify-center">
                             <i class="fas fa-user text-xs"></i>
                         </div>
                         <div class="flex-1">
-                            <p class="text-sm font-medium">Vous</p>
+                            <p class="text-xs lg:text-sm font-medium">Vous</p>
                             <p class="text-xs text-gray-400">En ligne</p>
                         </div>
                     </div>
@@ -247,20 +265,19 @@ try {
         </div>
 
         <!-- Zone de Chat Principal -->
-        <div class="flex-1 bg-gray-900 bg-opacity-50 rounded-2xl border border-gray-700 flex flex-col">
+        <div class="flex-1 bg-gray-900 bg-opacity-50 rounded-xl lg:rounded-2xl border border-gray-700 flex flex-col min-h-[calc(100vh-8rem)] lg:min-h-0">
             <!-- En-tête du Chat -->
-            <div class="p-6 border-b border-gray-700">
-                <h2 class="text-xl font-bold netflix-red">Chat Global Anonyme</h2>
-                <p class="text-gray-400 text-sm">Messages éphémères - Disparaissent après 5 minutes</p>
+            <div class="p-4 lg:p-6 border-b border-gray-700">
+                <h2 class="text-lg lg:text-xl font-bold netflix-red">Chat Global Anonyme</h2>
+                <p class="text-gray-400 text-xs lg:text-sm">Messages éphémères - Disparaissent après 5 minutes</p>
             </div>
 
             <!-- Messages -->
-            <!-- Messages -->
-            <div id="messagesContainer" class="flex-1 p-6 overflow-y-auto chat-container message-container">
-                <div id="welcomeMessage" class="text-center text-gray-500 py-8">
-                    <i class="fas fa-comments text-4xl mb-4 opacity-50"></i>
-                    <p>Aucun message pour le moment</p>
-                    <p class="text-sm">Commencez une conversation anonyme !</p>
+            <div id="messagesContainer" class="flex-1 p-4 lg:p-6 overflow-y-auto chat-container message-container">
+                <div id="welcomeMessage" class="text-center text-gray-500 py-6 lg:py-8">
+                    <i class="fas fa-comments text-3xl lg:text-4xl mb-4 opacity-50"></i>
+                    <p class="text-sm lg:text-base">Aucun message pour le moment</p>
+                    <p class="text-xs lg:text-sm">Commencez une conversation anonyme !</p>
                 </div>
                 <!-- Typing indicator (hidden by default) -->
                 <div id="typingIndicator" class="typing-indicator hidden">
@@ -274,16 +291,16 @@ try {
             </div>
 
             <!-- Zone de Saisie -->
-            <div class="p-6 border-t border-gray-700">
-                <div class="flex gap-3">
+            <div class="p-4 lg:p-6 border-t border-gray-700">
+                <div class="flex gap-2 lg:gap-3">
                     <input type="text" id="messageInput" placeholder="Tapez votre message anonyme..." 
-                           class="flex-1 bg-gray-800 border border-gray-600 rounded-lg px-4 py-3 text-white placeholder-gray-400 chat-input"
+                           class="flex-1 bg-gray-800 border border-gray-600 rounded-lg px-3 lg:px-4 py-2.5 lg:py-3 text-white placeholder-gray-400 chat-input text-sm lg:text-base"
                            onkeypress="handleKeyPress(event)"
                            oninput="handleTyping()">
-                    <button onclick="sendMessage()" class="netflix-red-bg hover:bg-red-700 text-white px-6 py-3 rounded-lg send-button">
+                    <button onclick="sendMessage()" class="netflix-red-bg hover:bg-red-700 text-white px-4 lg:px-6 py-2.5 lg:py-3 rounded-lg send-button">
                         <i class="fas fa-paper-plane"></i>
                     </button>
-                    <button onclick="showMediaUpload()" class="bg-gray-700 hover:bg-gray-600 text-white px-4 py-3 rounded-lg transition-colors">
+                    <button onclick="showMediaUpload()" class="bg-gray-700 hover:bg-gray-600 text-white px-3 lg:px-4 py-2.5 lg:py-3 rounded-lg transition-colors">
                         <i class="fas fa-image"></i>
                     </button>
                 </div>
@@ -328,6 +345,29 @@ try {
         const anonymousId = '<?php echo $anonymous_id; ?>';
         let currentSession = null;
         let messageInterval;
+        let messageInterval;
+
+        // Fonctions pour le menu mobile
+        function toggleMobileMenu() {
+            const mobileMenu = document.getElementById('mobile-menu');
+            const hamburger = document.querySelector('.hamburger');
+            
+            if (mobileMenu.classList.contains('hidden')) {
+                mobileMenu.classList.remove('hidden');
+                hamburger.innerHTML = '✕';
+            } else {
+                mobileMenu.classList.add('hidden');
+                hamburger.innerHTML = '☰';
+            }
+        }
+
+        function closeMobileMenu() {
+            const mobileMenu = document.getElementById('mobile-menu');
+            const hamburger = document.querySelector('.hamburger');
+            
+            mobileMenu.classList.add('hidden');
+            hamburger.innerHTML = '☰';
+        }
 
         // Initialisation
         document.addEventListener('DOMContentLoaded', function() {
