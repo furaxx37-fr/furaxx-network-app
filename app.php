@@ -316,6 +316,15 @@ try {
 
         // Initialisation
         document.addEventListener('DOMContentLoaded', function() {
+            // Vérifier s'il y a un code de session dans l'URL pour auto-join
+            const urlParams = new URLSearchParams(window.location.search);
+            const sessionCode = urlParams.get('session');
+            
+            if (sessionCode) {
+                // Auto-join la session depuis le lien partagé
+                autoJoinSession(sessionCode.toUpperCase());
+            }
+            
             loadMessages();
             loadOnlineUsers();
             startMessagePolling();
@@ -674,6 +683,40 @@ try {
                 } else {
                     alert('Code de session invalide ou expiré');
                 }
+            });
+        }
+
+        // Auto-join logic for shared session links
+        const urlParams = new URLSearchParams(window.location.search);
+        const sessionCode = urlParams.get('session');
+        if (sessionCode) {
+            // Auto-join the session
+            fetch('api/join_session.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    session_code: sessionCode,
+                    anonymous_id: userId
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    currentSession = sessionCode;
+                    document.getElementById('current-session').textContent = sessionCode;
+                    document.getElementById('session-info').style.display = 'block';
+                    hideCreateSession();
+                    loadMessages();
+                    startMessagePolling();
+                } else {
+                    alert('Erreur lors de la connexion à la session: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Erreur:', error);
+                alert('Erreur de connexion à la session');
             });
         }
 

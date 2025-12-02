@@ -25,8 +25,8 @@ try {
     $stmt = $pdo->prepare("INSERT IGNORE INTO anonymous_users (anonymous_id, is_host, created_at) VALUES (?, 1, NOW())");
     $stmt->execute([$anonymous_id]);
     
-    // Generate unique session code
-    $session_code = 'fx_' . uniqid() . '_' . rand(1000, 9999);
+    // Generate unique session code (10 chars max)
+    $session_code = 'fx' . rand(10000000, 99999999);
     
     // Create session
     $stmt = $pdo->prepare("INSERT INTO sessions (session_code, host_id, created_at) VALUES (?, ?, NOW())");

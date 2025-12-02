@@ -21,26 +21,26 @@ if (empty($session_code) || empty($anonymous_id) || !isValidSessionCode($session
 try {
     $pdo = Database::getInstance()->getConnection();
     
-    // Check if session exists and is active
-    $stmt = $pdo->prepare("SELECT * FROM sessions WHERE session_code = ? AND status = 'active' AND expires_at > NOW()");
-    $stmt->execute([$session_code]);
+    // Verify user is the host of this session
+    $stmt = $pdo->prepare("SELECT * FROM sessions WHERE session_code = ? AND host_id = ? AND status = 'active'");
+    $stmt->execute([$session_code, $anonymous_id]);
     $session = $stmt->fetch();
     
     if (!$session) {
-        http_response_code(404);
-        echo json_encode(['error' => 'Session not found or expired']);
+        http_response_code(403);
+        echo json_encode(['error' => 'Only session host can generate share links']);
         exit;
     }
     
-    // Ensure the anonymous user exists
-    $stmt = $pdo->prepare("INSERT IGNORE INTO anonymous_users (anonymous_id, is_host, created_at) VALUES (?, 0, NOW())");
-    $stmt->execute([$anonymous_id]);
+    // Get current server URL
+    $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http';
+    $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
+    $base_url = $protocol . '://' . $host;
     
-    // Add user to active connections
-    $stmt = $pdo->prepare("INSERT INTO active_connections (session_code, anonymous_id, last_ping) VALUES (?, ?, NOW()) ON DUPLICATE KEY UPDATE last_ping = NOW()");
-    $stmt->execute([$session_code, $anonymous_id]);
+    // Generate share link
+    $share_link = $base_url . '/app.php?join=' . urlencode($session_code);
     
-    // Get session participants count
+    // Get session info
     $stmt = $pdo->prepare("SELECT COUNT(*) as participant_count FROM active_connections WHERE session_code = ?");
     $stmt->execute([$session_code]);
     $count = $stmt->fetch()['participant_count'];
@@ -48,13 +48,14 @@ try {
     echo json_encode([
         'success' => true,
         'session_code' => $session_code,
-        'host_id' => $session['host_id'],
+        'share_link' => $share_link,
         'participant_count' => $count,
-        'message' => 'Successfully joined session'
+        'expires_at' => $session['expires_at'],
+        'message' => 'Share link generated successfully'
     ]);
     
 } catch (Exception $e) {
     http_response_code(500);
-    echo json_encode(['error' => 'Failed to join session', 'debug' => $e->getMessage()]);
+    echo json_encode(['error' => 'Failed to generate share link', 'debug' => $e->getMessage()]);
 }
 ?>
