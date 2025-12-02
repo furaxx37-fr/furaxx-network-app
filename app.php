@@ -1,5 +1,6 @@
 <?php
 require_once 'config.php';
+require_once 'functions.php';
 
 // Vérifier si l'utilisateur a un ID anonyme valide
 if (!isset($_GET['id']) && !isset($_POST['anonymous_id'])) {
@@ -16,7 +17,7 @@ if (!isValidAnonymousId($anonymous_id)) {
 
 // Enregistrer ou mettre à jour l'utilisateur dans la base de données
 try {
-    $db = Database::getInstance()->getConnection();
+    $db = $pdo;
     
     $stmt = $db->prepare("INSERT INTO anonymous_users (anonymous_id) VALUES (?) ON DUPLICATE KEY UPDATE last_activity = CURRENT_TIMESTAMP");
     $stmt->execute([$anonymous_id]);
