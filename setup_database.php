@@ -2,7 +2,7 @@
 require_once 'config.php';
 
 try {
-    $db = Database::getInstance()->getConnection();
+    $db = $pdo;
     
     // Table des utilisateurs anonymes
     $db->exec("
