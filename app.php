@@ -60,6 +60,111 @@ try {
         .chat-container {
             height: calc(100vh - 200px);
         }
+        
+        /* Enhanced Message Bubbles */
+        .message-bubble-sent {
+            background: linear-gradient(135deg, #e50914, #b8070f);
+            margin-left: auto;
+            margin-right: 0;
+            border-radius: 18px 18px 4px 18px;
+            max-width: 70%;
+            animation: slideInRight 0.3s ease-out;
+        }
+        
+        .message-bubble-received {
+            background: linear-gradient(135deg, #374151, #4b5563);
+            margin-left: 0;
+            margin-right: auto;
+            border-radius: 18px 18px 18px 4px;
+            max-width: 70%;
+            animation: slideInLeft 0.3s ease-out;
+        }
+        
+        @keyframes slideInRight {
+            from { opacity: 0; transform: translateX(20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        
+        @keyframes slideInLeft {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        
+        /* Typing Indicator */
+        .typing-indicator {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            background: #374151;
+            border-radius: 18px 18px 18px 4px;
+            margin: 8px 0;
+            max-width: 80px;
+        }
+        
+        .typing-dots {
+            display: flex;
+            gap: 4px;
+        }
+        
+        .typing-dot {
+            width: 6px;
+            height: 6px;
+            background: #9ca3af;
+            border-radius: 50%;
+            animation: typingBounce 1.4s infinite ease-in-out;
+        }
+        
+        .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+        .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+        
+        @keyframes typingBounce {
+            0%, 80%, 100% { transform: scale(0.8); opacity: 0.5; }
+            40% { transform: scale(1); opacity: 1; }
+        }
+        
+        /* Message Status Indicators */
+        .message-status {
+            font-size: 10px;
+            color: #9ca3af;
+            margin-top: 4px;
+            text-align: right;
+        }
+        
+        .status-sent { color: #6b7280; }
+        .status-delivered { color: #10b981; }
+        
+        /* Enhanced Input Focus */
+        .chat-input:focus {
+            box-shadow: 0 0 0 2px rgba(229, 9, 20, 0.3);
+            border-color: #e50914;
+        }
+        
+        /* Scroll Animations */
+        .message-container {
+            scroll-behavior: smooth;
+        }
+        
+        /* Hover Effects */
+        .message-bubble-sent:hover,
+        .message-bubble-received:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            transition: all 0.2s ease;
+        }
+        
+        /* Enhanced Button Animations */
+        .send-button {
+            transition: all 0.2s ease;
+        }
+        
+        .send-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(229, 9, 20, 0.4);
+        }
+        
+        .send-button:active {
+            transform: scale(0.95);
+        }
     </style>
 </head>
 <body class="min-h-screen text-white">
@@ -143,11 +248,21 @@ try {
             </div>
 
             <!-- Messages -->
-            <div id="messagesContainer" class="flex-1 p-6 overflow-y-auto chat-container">
-                <div class="text-center text-gray-500 py-8">
+            <!-- Messages -->
+            <div id="messagesContainer" class="flex-1 p-6 overflow-y-auto chat-container message-container">
+                <div id="welcomeMessage" class="text-center text-gray-500 py-8">
                     <i class="fas fa-comments text-4xl mb-4 opacity-50"></i>
                     <p>Aucun message pour le moment</p>
                     <p class="text-sm">Commencez une conversation anonyme !</p>
+                </div>
+                <!-- Typing indicator (hidden by default) -->
+                <div id="typingIndicator" class="typing-indicator hidden">
+                    <div class="typing-dots">
+                        <div class="typing-dot"></div>
+                        <div class="typing-dot"></div>
+                        <div class="typing-dot"></div>
+                    </div>
+                    <span class="ml-2 text-xs text-gray-400">Quelqu'un écrit...</span>
                 </div>
             </div>
 
@@ -155,9 +270,10 @@ try {
             <div class="p-6 border-t border-gray-700">
                 <div class="flex gap-3">
                     <input type="text" id="messageInput" placeholder="Tapez votre message anonyme..." 
-                           class="flex-1 bg-gray-800 border border-gray-600 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:border-red-400 focus:outline-none"
-                           onkeypress="handleKeyPress(event)">
-                    <button onclick="sendMessage()" class="netflix-red-bg hover:bg-red-700 text-white px-6 py-3 rounded-lg transition-colors">
+                           class="flex-1 bg-gray-800 border border-gray-600 rounded-lg px-4 py-3 text-white placeholder-gray-400 chat-input"
+                           onkeypress="handleKeyPress(event)"
+                           oninput="handleTyping()">
+                    <button onclick="sendMessage()" class="netflix-red-bg hover:bg-red-700 text-white px-6 py-3 rounded-lg send-button">
                         <i class="fas fa-paper-plane"></i>
                     </button>
                     <button onclick="showMediaUpload()" class="bg-gray-700 hover:bg-gray-600 text-white px-4 py-3 rounded-lg transition-colors">
@@ -210,24 +326,114 @@ try {
                 sendMessage();
             }
         }
-
-        function sendMessage() {
+        
+        function handleTyping() {
+            // Show typing indicator functionality
             const messageInput = document.getElementById('messageInput');
             const message = messageInput.value.trim();
             
-            if (!message) return;
+            // Clear previous typing timeout
+            if (window.typingTimeout) {
+                clearTimeout(window.typingTimeout);
+            }
+            
+            // Send typing indicator if user is typing
+            if (message.length > 0) {
+                // You can extend this to send typing status to other users
+                // For now, we'll just handle local UI feedback
+                
+                // Set timeout to clear typing status
+                window.typingTimeout = setTimeout(() => {
+                    // Clear typing indicator after 2 seconds of inactivity
+                }, 2000);
+            }
+        }
+
+        function showMediaUpload() {
+            // Create media upload modal
+            const modal = document.createElement('div');
+            modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+            modal.innerHTML = `
+                <div class="bg-gray-800 rounded-lg p-6 max-w-md w-full mx-4">
+                    <h3 class="text-white text-lg font-semibold mb-4">Partager un média</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-gray-300 text-sm mb-2">Choisir un fichier</label>
+                            <input type="file" id="mediaFile" accept="image/*,video/*" 
+                                   class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white">
+                        </div>
+                        <div class="flex gap-3">
+                            <button onclick="uploadMedia()" class="flex-1 netflix-red-bg hover:bg-red-700 text-white py-2 rounded">
+                                Envoyer
+                            </button>
+                            <button onclick="closeMediaModal()" class="flex-1 bg-gray-600 hover:bg-gray-500 text-white py-2 rounded">
+                                Annuler
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+            window.currentMediaModal = modal;
+        }
+
+        function closeMediaModal() {
+            if (window.currentMediaModal) {
+                document.body.removeChild(window.currentMediaModal);
+                window.currentMediaModal = null;
+            }
+        }
+
+        function uploadMedia() {
+            const fileInput = document.getElementById('mediaFile');
+            const file = fileInput.files[0];
+            
+            if (!file) {
+                showNotification('Veuillez sélectionner un fichier', 'error');
+                return;
+            }
+            
+            if (file.size > 10 * 1024 * 1024) { // 10MB limit
+                showNotification('Fichier trop volumineux (max 10MB)', 'error');
+                return;
+            }
+            
+            // For now, show a placeholder message
+            showNotification('Fonctionnalité de partage de médias en développement', 'info');
+            closeMediaModal();
+        }
+
+        function sendMessage() {
+            const messageInput = document.getElementById('messageInput');
+            const sendButton = document.querySelector('button[onclick="sendMessage()"]');
+            const message = messageInput.value.trim();
+            
+            if (!message || message.length > 500) {
+                if (message.length > 500) {
+                    showNotification('Message trop long (max 500 caractères)', 'error');
+                }
+                return;
+            }
+            
+            // Disable input and button during sending
+            messageInput.disabled = true;
+            if (sendButton) {
+                sendButton.disabled = true;
+                sendButton.innerHTML = '<svg class="animate-spin h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>Envoi...';
+            }
             
             // Afficher le message immédiatement (optimistic UI)
-            displayMessage({
+            const tempMessage = {
                 sender_id: anonymousId,
                 content: message,
                 created_at: new Date().toISOString(),
                 message_type: 'text'
-            }, true);
+            };
+            displayMessage(tempMessage, true);
             
             messageInput.value = '';
             
-            // Envoyer au serveur
+            // Envoyer au serveur avec gestion d'erreur
             fetch('api/send_message.php', {
                 method: 'POST',
                 headers: {
@@ -238,7 +444,68 @@ try {
                     message: message,
                     session_code: currentSession
                 })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (!data.success) {
+                    throw new Error(data.error || 'Erreur lors de l\'envoi');
+                }
+                // Message sent successfully
+                showNotification('Message envoyé', 'success');
+            })
+            .catch(error => {
+                console.error('Error sending message:', error);
+                showNotification('Erreur lors de l\'envoi du message', 'error');
+            })
+            .finally(() => {
+                // Re-enable input and button
+                messageInput.disabled = false;
+                messageInput.focus();
+                if (sendButton) {
+                    sendButton.disabled = false;
+                    sendButton.innerHTML = 'Envoyer';
+                }
             });
+        }
+
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg transform translate-x-full transition-all duration-300 ${
+                type === 'success' ? 'bg-green-600' : 
+                type === 'error' ? 'bg-red-600' : 'bg-blue-600'
+            }`;
+            
+            notification.innerHTML = `
+                <div class="flex items-center text-white">
+                    <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                        ${type === 'success' ? 
+                            '<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>' :
+                            type === 'error' ?
+                            '<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>' :
+                            '<path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>'
+                        }
+                    </svg>
+                    <span>${message}</span>
+                </div>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            // Slide in animation
+            setTimeout(() => {
+                notification.classList.remove('translate-x-full');
+                notification.classList.add('translate-x-0');
+            }, 100);
+            
+            // Auto remove after 3 seconds
+            setTimeout(() => {
+                notification.classList.add('translate-x-full');
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        notification.parentNode.removeChild(notification);
+                    }
+                }, 300);
+            }, 3000);
         }
 
         function displayMessage(message, isOwn = false) {
@@ -247,22 +514,42 @@ try {
             if (emptyState) emptyState.remove();
             
             const messageDiv = document.createElement('div');
-            messageDiv.className = `message-bubble mb-4 ${isOwn ? 'ml-auto' : 'mr-auto'} max-w-xs`;
+            messageDiv.className = `message-bubble mb-4 ${isOwn ? 'ml-auto' : 'mr-auto'} max-w-xs opacity-0 transform translate-y-4`;
             
             const senderColor = isOwn ? 'netflix-red-bg' : 'bg-gray-700';
             const alignment = isOwn ? 'text-right' : 'text-left';
+            const animationClass = isOwn ? 'slideInFromRight' : 'slideInFromLeft';
             
+            // Enhanced message bubble with better styling
             messageDiv.innerHTML = `
-                <div class="${senderColor} p-3 rounded-lg ${alignment}">
-                    <p class="text-white">${escapeHtml(message.content)}</p>
-                    <p class="text-xs opacity-75 mt-1">
-                        ${isOwn ? 'Vous' : 'Anonyme'} • ${formatTime(message.created_at)}
+                <div class="${senderColor} p-4 rounded-2xl ${alignment} shadow-lg border border-opacity-20 border-white hover:shadow-xl transition-all duration-300">
+                    <p class="text-white text-sm leading-relaxed">${escapeHtml(message.content)}</p>
+                    <p class="text-xs opacity-75 mt-2 flex items-center ${isOwn ? 'justify-end' : 'justify-start'}">
+                        <span class="inline-flex items-center">
+                            <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"></path>
+                            </svg>
+                            ${isOwn ? 'Vous' : 'Anonyme'} • ${formatTime(message.created_at)}
+                        </span>
                     </p>
                 </div>
             `;
             
             container.appendChild(messageDiv);
-            container.scrollTop = container.scrollHeight;
+            
+            // Smooth animation entrance
+            setTimeout(() => {
+                messageDiv.classList.remove('opacity-0', 'transform', 'translate-y-4');
+                messageDiv.classList.add('opacity-100', animationClass);
+            }, 50);
+            
+            // Auto-scroll with smooth behavior
+            setTimeout(() => {
+                container.scrollTo({
+                    top: container.scrollHeight,
+                    behavior: 'smooth'
+                });
+            }, 200);
         }
 
         function loadMessages() {
