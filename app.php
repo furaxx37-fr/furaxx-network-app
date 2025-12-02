@@ -562,7 +562,7 @@ try {
         }
 
         function loadMessages() {
-            fetch(`api/get_messages.php?anonymous_id=${anonymousId}&session=${currentSession || ''}`)
+            fetch(`api/get_messages.php?anonymous_id=${anonymousId}&session_code=${currentSession || ''}`)
                 .then(response => response.json())
                 .then(messages => {
                     const container = document.getElementById('messagesContainer');
