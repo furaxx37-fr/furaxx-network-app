@@ -164,13 +164,17 @@
         function createSession() {
             showLoading();
             
+            // Générer un ID anonyme unique
+            const anonymousId = 'anon_' + Math.random().toString(36).substr(2, 16) + '_' + Date.now();
+            
             // Générer un code de session
             const sessionCode = Math.random().toString(36).substr(2, 6).toUpperCase();
             
             setTimeout(() => {
+                localStorage.setItem('furaxx_anonymous_id', anonymousId);
                 localStorage.setItem('furaxx_session_code', sessionCode);
                 localStorage.setItem('furaxx_is_host', 'true');
-                window.location.href = 'app.php?id=' + anonymousId + '&session_code=' + sessionCode;
+                window.location.href = 'app.php?anonymous_id=' + anonymousId + '&session_code=' + sessionCode;
             }, 1500);
         }
 
