@@ -681,7 +681,7 @@ try {
 
         function createSession() {
             const sessionName = document.getElementById('sessionName').value || 'Session anonyme';
-            const customCode = document.getElementById('customSessionCode').value.trim();
+            const customCode = document.getElementById('customCode').value.trim();
             
             const requestData = {
                 anonymous_id: anonymousId,
@@ -715,7 +715,6 @@ try {
                 console.error('Erreur:', error);
                 alert('Erreur lors de la création de la session');
             });
-        }
         }
 
         function joinSession() {
