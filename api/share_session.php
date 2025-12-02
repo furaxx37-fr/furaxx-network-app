@@ -38,7 +38,7 @@ try {
     $base_url = $protocol . '://' . $host;
     
     // Generate share link
-    $share_link = $base_url . '/app.php?join=' . urlencode($session_code);
+    $share_link = $base_url . '/app.php?session=' . urlencode($session_code);
     
     // Get session info
     $stmt = $pdo->prepare("SELECT COUNT(*) as participant_count FROM active_connections WHERE session_code = ?");

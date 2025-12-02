@@ -212,6 +212,12 @@ try {
                         <i class="fas fa-sign-in-alt"></i>
                     </button>
                 </div>
+
+                <!-- Bouton de partage -->
+                <button id="shareButton" onclick="shareSession()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition-colors hidden">
+                    <i class="fas fa-share-alt mr-2"></i>
+                    Partager la Session
+                </button>
             </div>
 
             <!-- Sessions Actives -->
@@ -295,6 +301,14 @@ try {
                     <label class="block text-sm font-medium mb-2">Nom de la session (optionnel)</label>
                     <input type="text" id="sessionName" placeholder="Session anonyme" 
                            class="w-full bg-gray-800 border border-gray-600 rounded-lg px-3 py-2 text-white placeholder-gray-400 focus:border-purple-400 focus:outline-none">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium mb-2">Code de session personnalisé (optionnel)</label>
+                    <input type="text" id="customCode" placeholder="Laissez vide pour génération automatique" 
+                           class="w-full bg-gray-800 border border-gray-600 rounded-lg px-3 py-2 text-white placeholder-gray-400 focus:border-purple-400 focus:outline-none"
+                           maxlength="12" pattern="[a-zA-Z0-9]{4,12}">
+                    <p class="text-xs text-gray-500 mt-1">4-12 caractères alphanumériques uniquement</p>
                 </div>
                 
                 <div class="flex gap-3">
@@ -635,18 +649,55 @@ try {
             document.getElementById('createSessionModal').classList.add('hidden');
         }
 
+        function showShareButton() {
+            const shareButton = document.getElementById('shareButton');
+            if (shareButton) {
+                shareButton.classList.remove('hidden');
+            }
+        }
+
+        function shareSession() {
+            if (!currentSession) {
+                alert('Aucune session active à partager');
+                return;
+            }
+            
+            const shareUrl = `${window.location.origin}${window.location.pathname}?session=${currentSession}`;
+            
+            if (navigator.share) {
+                navigator.share({
+                    title: 'Rejoindre ma session Furaxx Network',
+                    text: `Rejoignez ma session avec le code: ${currentSession}`,
+                    url: shareUrl
+                });
+            } else {
+                navigator.clipboard.writeText(shareUrl).then(() => {
+                    alert(`Lien copié ! Code de session: ${currentSession}\nLien: ${shareUrl}`);
+                }).catch(() => {
+                    prompt('Copiez ce lien:', shareUrl);
+                });
+            }
+        }
+
         function createSession() {
             const sessionName = document.getElementById('sessionName').value || 'Session anonyme';
+            const customCode = document.getElementById('customSessionCode').value.trim();
+            
+            const requestData = {
+                anonymous_id: anonymousId,
+                session_name: sessionName
+            };
+            
+            if (customCode) {
+                requestData.custom_code = customCode;
+            }
             
             fetch('api/create_session.php', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({
-                    anonymous_id: anonymousId,
-                    session_name: sessionName
-                })
+                body: JSON.stringify(requestData)
             })
             .then(response => response.json())
             .then(data => {
@@ -655,8 +706,16 @@ try {
                     currentSession = data.session_code;
                     hideCreateSession();
                     loadMessages();
+                    showShareButton();
+                } else {
+                    alert(data.message || 'Erreur lors de la création de la session');
                 }
+            })
+            .catch(error => {
+                console.error('Erreur:', error);
+                alert('Erreur lors de la création de la session');
             });
+        }
         }
 
         function joinSession() {
