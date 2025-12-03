@@ -348,25 +348,30 @@ try {
         let messageInterval;
 
         // Fonctions pour le menu mobile
-        function toggleMobileMenu() {
-            const mobileMenu = document.getElementById('mobile-menu');
-            const hamburger = document.querySelector('.hamburger');
+        function toggleMobileSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('mobileOverlay');
             
-            if (mobileMenu.classList.contains('hidden')) {
-                mobileMenu.classList.remove('hidden');
-                hamburger.innerHTML = '✕';
+            if (sidebar.classList.contains('-translate-x-full')) {
+                // Show sidebar
+                sidebar.classList.remove('-translate-x-full');
+                sidebar.classList.add('translate-x-0');
+                overlay.classList.remove('hidden');
             } else {
-                mobileMenu.classList.add('hidden');
-                hamburger.innerHTML = '☰';
+                // Hide sidebar
+                sidebar.classList.add('-translate-x-full');
+                sidebar.classList.remove('translate-x-0');
+                overlay.classList.add('hidden');
             }
         }
 
-        function closeMobileMenu() {
-            const mobileMenu = document.getElementById('mobile-menu');
-            const hamburger = document.querySelector('.hamburger');
+        function closeMobileSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('mobileOverlay');
             
-            mobileMenu.classList.add('hidden');
-            hamburger.innerHTML = '☰';
+            sidebar.classList.add('-translate-x-full');
+            sidebar.classList.remove('translate-x-0');
+            overlay.classList.add('hidden');
         }
 
         // Initialisation
